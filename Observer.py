@@ -1,28 +1,23 @@
-from reactivex import Observable, create
+class Event:
+    def __init__(self):
+        self.subscribers = []
+
+    def subscribe(self, func):
+        self.subscribers.append(func)
+
+    def notify(self, *args, **kwargs):
+        for subscriber in self.subscribers:
+            subscriber(*args, **kwargs)
 
 
-def get_quotes():
-    import contextlib, io
-
-    zen = io.StringIO()
-
-    with contextlib.redirect_stdout(zen):
-        import this
-
-    quotes = zen.getvalue().split('\n')[1:]
-    return quotes
+# Define a handler for the event
+def on_custom_event(data):
+    print(f"Received event data: {data}")
 
 
-def push_quotes(obs, sch):
-    quotes = get_quotes()
-    for q in quotes:
-        if q:
-            obs.on_next(q)
-        else:
-            obs.on_next('No quotes')
+# Create event
+event = Event()
+event.subscribe(on_custom_event)
 
-    obs.on_completed()
-
-
-source = create(push_quotes)
-source.subscribe(on_next=lambda x: print(x), on_completed=lambda: print('completed'), on_error=lambda e: print(e))
+# Trigger event
+event.notify("Hello World")
